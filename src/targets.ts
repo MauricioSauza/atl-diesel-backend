@@ -54,15 +54,15 @@ export const sumAvailable = (rows: CompleteRow[]): AvailableRow[] => {
 }
 
 interface ComputeTargets {
-    rows: AvailableRow[]
-    ignored: IgnoredRow[]
+    targets: AvailableRow[]
+    ignoredRows: IgnoredRow[]
 }
 export const computeTargets = (validRows: ValidRow[], warehouses: WarehouseMap): ComputeTargets => {
     const { valid, ignored } = filterRows(validRows, warehouses)
     const sanitizedRows = sumAvailable(valid)
 
     return {
-        rows: sanitizedRows,
-        ignored
+        targets: sanitizedRows,
+        ignoredRows: ignored
     }
 }

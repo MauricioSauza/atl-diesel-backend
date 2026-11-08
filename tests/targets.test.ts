@@ -166,7 +166,7 @@ describe('computeTargets', () => {
         const result = computeTargets(rows, WAREHOUSES)
 
         // Assert
-        const summary = result.rows.map((row) => [row.data.sku, row.warehouseName, row.data.available])
+        const summary = result.targets.map((row) => [row.data.sku, row.warehouseName, row.data.available])
         expect(summary).toEqual([
             ['AB-100', ATLANTA, 12],
             ['AB-100', DALLAS, 8],
@@ -174,11 +174,11 @@ describe('computeTargets', () => {
             ['GH-400', DALLAS, 10],
             ['IJ-500', DALLAS, 0],
         ])
-        expect(result.ignored.map((row) => row.line)).toEqual([7])
+        expect(result.ignoredRows.map((row) => row.line)).toEqual([7])
     })
 
     it('returns empty lists for no rows', () => {
-        expect(computeTargets([], WAREHOUSES)).toEqual({ rows: [], ignored: [] })
+        expect(computeTargets([], WAREHOUSES)).toEqual({ targets: [], ignoredRows: [] })
     })
 
     // CD200_ATL_OVERCOMMITTED is left out of the sample test until rule 3 is decided
