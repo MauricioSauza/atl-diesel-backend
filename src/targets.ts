@@ -35,19 +35,22 @@ export interface AvailableRow {
 
 export const sumAvailable = (rows: CompleteRow[]): AvailableRow[] => {
     const grouped = new Map<string, AvailableRow>()
-    for ( const { line, data, warehouseName } of rows) {
+    for (const { line, data, warehouseName } of rows) {
         const key = `${data.sku}|${data.warehouse}`
-        const available = data.qty_on_hand - data.qty_committed
         const existingKeys = grouped.get(key)
 
         if (existingKeys) {
             existingKeys.lines.push(line)
             existingKeys.data.qty_on_hand += data.qty_on_hand
             existingKeys.data.qty_committed += data.qty_committed
-            existingKeys.data.available += available
         } else {
-            grouped.set(key, {lines: [line], data: {...data, available}, warehouseName})
+            grouped.set(key, { lines: [line], data: { ...data, available: 0 }, warehouseName })
         }
+    }
+
+    // Rule 3: subtract once from the summed totals, never below 0 (sum first, then clamp)
+    for (const group of grouped.values()) {
+        group.data.available = Math.max(0, group.data.qty_on_hand - group.data.qty_committed)
     }
 
     return [...grouped.values()]

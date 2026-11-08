@@ -4,6 +4,7 @@ import { computeTargets } from './targets.js';
 import { loadShopifyConfig, getAccessToken } from './shopify.js';
 import { fetchCurrentStock } from './shopify-stock.js'
 import { decisionStock } from './decision-stock.js'
+import { applyUpdates } from './apply-updates.js'
 
 const { values } = parseArgs({
   options: {
@@ -36,7 +37,13 @@ async function main(): Promise<void> {
   const skus = targets.map((target) => target.data.sku)
   const shopifyCurrentStock = await fetchCurrentStock(token, config, skus)
   const decisionFinalStock = decisionStock(targets, shopifyCurrentStock)
-  console.info(decisionFinalStock)
+  if (options.dryRun) {
+    console.info("Dry run: nothing written to Shopify")
+  } else {
+    const updated = await applyUpdates(token, config, decisionFinalStock)
+    console.info(`Updated ${updated} quantities in Shopify`)
+  }
+  
 }
 
 main().catch((error: unknown) => {

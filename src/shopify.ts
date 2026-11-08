@@ -74,28 +74,79 @@ interface GraphqlResponse {
     }
 }
 
+// ---------- Retry helpers ----------
+
+const MAX_ATTEMPTS = 5
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+// Exponential backoff: 1s, 2s, 4s, 8s
+const backoffMs = (attempt: number): number => 1000 * 2 ** (attempt - 1)
+
+// Throttled: wait exactly until Shopify has refilled enough points for this query.
+// wait = (points needed - points left) / points refilled per second
+const throttleWaitMs = (body: GraphqlResponse, attempt: number): number => {
+    const cost = body.extensions?.cost
+    if (cost === undefined) {
+        return backoffMs(attempt)  // no numbers from Shopify: fall back to backoff
+    }
+    const missingPoints = cost.requestedQueryCost - cost.throttleStatus.currentlyAvailable
+    const seconds = missingPoints / cost.throttleStatus.restoreRate
+    return Math.max(seconds * 1000, 500)  // wait at least 0.5s
+}
+
+const waitBeforeRetry = async (reason: string, ms: number, attempt: number): Promise<void> => {
+    console.warn(`  ${reason}: retrying in ${(ms / 1000).toFixed(1)}s (attempt ${attempt + 1}/${MAX_ATTEMPTS})`)
+    await sleep(ms)
+}
+
+// ---------- Client ----------
+
 export const shopifyGraphqlClient = async (
-    token: string, 
+    token: string,
     config: ShopifyConfig,
-    query: string, 
-    variables: Record<string, unknown> = {}, 
+    query: string,
+    variables: Record<string, unknown> = {},
 ): Promise<unknown> => {
-    const response = await fetch(`https://${config.SHOPIFY_SHOP}.myshopify.com/admin/api/${config.SHOPIFY_API_VERSION}/graphql.json`, {
+    const url = `https://${config.SHOPIFY_SHOP}.myshopify.com/admin/api/${config.SHOPIFY_API_VERSION}/graphql.json`
+    const request = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token} ,
-        body: JSON.stringify({ query, variables })
-    })
-
-    if (!response.ok) {
-        throw new Error(`Shopify HTTP ${response.status}: ${await response.text()}`)
+        headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token },
+        body: JSON.stringify({ query, variables }),  // same body on every retry (same idempotency key)
     }
 
-    const body = await response.json() as GraphqlResponse
-    if (body.errors) {
-        const messages = body.errors.map((e) => e.extensions?.code ? `${e.extensions.code}: ${e.message}` : e.message)
-        throw new Error(`Shopify GraphQL errors: ${messages.join('; ')}`)
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        const response = await fetch(url, request)
+
+        // 429 = too many requests, 5xx = Shopify-side problem: both are temporary, so retry
+        const temporary = response.status === 429 || response.status >= 500
+        if (temporary && attempt < MAX_ATTEMPTS) {
+            await waitBeforeRetry(`HTTP ${response.status}`, backoffMs(attempt), attempt)
+            continue
+        }
+
+        if (!response.ok) {
+            throw new Error(`Shopify HTTP ${response.status}: ${await response.text()}`)
+        }
+
+        const body = await response.json() as GraphqlResponse
+
+        // Throttled comes back as HTTP 200 with an error code
+        const throttled = body.errors?.some((e) => e.extensions?.code === 'THROTTLED') ?? false
+        if (throttled && attempt < MAX_ATTEMPTS) {
+            await waitBeforeRetry('Throttled', throttleWaitMs(body, attempt), attempt)
+            continue
+        }
+
+        // Any other error is not temporary: retrying would not help
+        if (body.errors) {
+            const messages = body.errors.map((e) => e.extensions?.code ? `${e.extensions.code}: ${e.message}` : e.message)
+            throw new Error(`Shopify GraphQL errors: ${messages.join('; ')}`)
+        }
+
+        return body.data
     }
 
-    return body.data
+    throw new Error(`Shopify request failed after ${MAX_ATTEMPTS} attempts`)
 }
 
