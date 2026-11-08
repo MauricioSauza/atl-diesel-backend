@@ -1,0 +1,11 @@
+sku,warehouse,qty_on_hand,qty_committed
+AB-100,ATL,10,2
+ ab-100 ,ATL,5,1
+AB-100,DAL,8,0
+CD-200,ATL,3,5
+EF-300,ATL,20,4
+EF-300,MIA,7,0
+GH-400,DAL,12,2
+ZZ-999,ATL,4,0
+IJ-500,DAL,0,0
+KL-600,ATL,abc,1
