@@ -1,0 +1,84 @@
+{
+  "ranAt": "2026-11-09T01:13:00.829Z",
+  "mode": "apply",
+  "status": "success",
+  "error": null,
+  "counts": {
+    "UPDATE": 0,
+    "UNCHANGED": 6,
+    "UNMATCHED": 1,
+    "rejected": 1,
+    "ignored": 1
+  },
+  "results": [
+    {
+      "sku": "AB-100",
+      "location": "Atlanta Warehouse",
+      "oldValue": 12,
+      "newValue": 12,
+      "action": "UNCHANGED"
+    },
+    {
+      "sku": "AB-100",
+      "location": "Dallas Warehouse",
+      "oldValue": 8,
+      "newValue": 8,
+      "action": "UNCHANGED"
+    },
+    {
+      "sku": "CD-200",
+      "location": "Atlanta Warehouse",
+      "oldValue": 0,
+      "newValue": 0,
+      "action": "UNCHANGED"
+    },
+    {
+      "sku": "EF-300",
+      "location": "Atlanta Warehouse",
+      "oldValue": 16,
+      "newValue": 16,
+      "action": "UNCHANGED"
+    },
+    {
+      "sku": "GH-400",
+      "location": "Dallas Warehouse",
+      "oldValue": 10,
+      "newValue": 10,
+      "action": "UNCHANGED"
+    },
+    {
+      "sku": "ZZ-999",
+      "location": "Atlanta Warehouse",
+      "oldValue": null,
+      "newValue": 4,
+      "action": "UNMATCHED"
+    },
+    {
+      "sku": "IJ-500",
+      "location": "Dallas Warehouse",
+      "oldValue": 0,
+      "newValue": 0,
+      "action": "UNCHANGED"
+    }
+  ],
+  "rejected": [
+    {
+      "line": 11,
+      "raw": {
+        "sku": "KL-600",
+        "warehouse": "ATL",
+        "qty_on_hand": "abc",
+        "qty_committed": "1"
+      },
+      "reason": "qty_on_hand: must be a whole number, 0 or more"
+    }
+  ],
+  "ignored": [
+    {
+      "line": 7,
+      "sku": "EF-300",
+      "warehouse": "MIA",
+      "reason": "Warehouse \"MIA\" is not in the warehouse map"
+    }
+  ]
+}

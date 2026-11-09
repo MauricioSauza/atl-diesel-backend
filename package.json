@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:coverage": "npm test -- --coverage",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
+    "reset-stock": "tsx --env-file-if-exists=.env src/scripts/reset-stock.ts"
   },
   "keywords": [],
   "author": "",

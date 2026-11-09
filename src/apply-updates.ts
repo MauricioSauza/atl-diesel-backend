@@ -3,7 +3,7 @@ import type { Decision } from './decision-stock.js'
 import { shopifyGraphqlClient, type ShopifyConfig } from './shopify.js'
 import { INVENTORY_SET_QUANTITIES_MUTATION } from './graphql/inventory-set-quantities.js'
 
-interface SetQuantitiesResult {
+export interface SetQuantitiesResult {
     inventorySetQuantities: {
         userErrors: { code: string | null, message: string }[]
     }

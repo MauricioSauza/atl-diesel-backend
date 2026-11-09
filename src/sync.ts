@@ -5,6 +5,7 @@ import { loadShopifyConfig, getAccessToken } from './shopify.js';
 import { fetchCurrentStock } from './shopify-stock.js'
 import { decisionStock } from './decision-stock.js'
 import { applyUpdates } from './apply-updates.js'
+import { buildReport, writeReport } from './report.js'
 
 const { values } = parseArgs({
   options: {
@@ -37,13 +38,31 @@ async function main(): Promise<void> {
   const skus = targets.map((target) => target.data.sku)
   const shopifyCurrentStock = await fetchCurrentStock(token, config, skus)
   const decisionFinalStock = decisionStock(targets, shopifyCurrentStock)
+  let error: string | null = null
+
   if (options.dryRun) {
     console.info("Dry run: nothing written to Shopify")
   } else {
-    const updated = await applyUpdates(token, config, decisionFinalStock)
-    console.info(`Updated ${updated} quantities in Shopify`)
+    try {
+      const updated = await applyUpdates(token, config, decisionFinalStock)
+      console.info(`Updated ${updated} quantities in Shopify`)
+    } catch (applyError: unknown) {
+      error = applyError instanceof Error ? applyError.message : 'Unknown error'
+    }
   }
-  
+
+  const report = buildReport({
+    mode: options.dryRun ? 'dry-run' : 'apply',
+    decisions: decisionFinalStock,
+    rejected,
+    ignored: ignoredRows,
+    error,
+  })
+  console.info(`Report: ${writeReport(report)}`)
+
+  if (error !== null) {
+    throw new Error(`Applying updates failed: ${error}`)
+  }
 }
 
 main().catch((error: unknown) => {

@@ -1,5 +1,6 @@
-import type { ValidRow, WarehouseMap } from '../src/inputs.js'
-import type { CompleteRow } from '../src/targets.js'
+import type { RejectedRow, ValidRow, WarehouseMap } from '../src/inputs.js'
+import type { CompleteRow, IgnoredRow } from '../src/targets.js'
+import type { Decision } from '../src/decision-stock.js'
 import type { ShopifyConfig } from '../src/shopify.js'
 
 export const ATLANTA = 'Atlanta Warehouse'
@@ -82,4 +83,45 @@ export const THROTTLED_BODY = {
 
 export const UNDEFINED_FIELD_BODY = {
     errors: [{ message: "Field 'notAField' doesn't exist", extensions: { code: 'undefinedField' } }],
+}
+
+export const UPDATE_DECISION: Decision = {
+    sku: 'AB-100',
+    location: DALLAS,
+    oldValue: 5,
+    newValue: 8,
+    action: 'UPDATE',
+    inventoryItemId: 'gid://shopify/InventoryItem/1',
+    locationId: 'gid://shopify/Location/2',
+}
+
+export const UNCHANGED_DECISION: Decision = {
+    sku: 'AB-100',
+    location: ATLANTA,
+    oldValue: 12,
+    newValue: 12,
+    action: 'UNCHANGED',
+    inventoryItemId: 'gid://shopify/InventoryItem/1',
+    locationId: 'gid://shopify/Location/1',
+}
+
+export const UNMATCHED_DECISION: Decision = {
+    sku: 'ZZ-999',
+    location: ATLANTA,
+    oldValue: null,
+    newValue: 4,
+    action: 'UNMATCHED',
+    inventoryItemId: null,
+    locationId: null,
+}
+
+export const KL600_REJECTED: RejectedRow = {
+    line: 11,
+    raw: { sku: 'KL-600', warehouse: 'ATL', qty_on_hand: 'abc', qty_committed: '1' },
+    reason: 'qty_on_hand: must be a whole number, 0 or more',
+}
+
+export const EF300_MIA_IGNORED: IgnoredRow = {
+    ...EF300_MIA_UNMAPPED,
+    reason: 'Warehouse "MIA" is not in the warehouse map',
 }
