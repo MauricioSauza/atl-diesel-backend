@@ -1,11 +1,11 @@
 {
-  "ranAt": "2026-11-09T01:13:00.829Z",
+  "ranAt": "2026-11-09T01:33:09.758Z",
   "mode": "apply",
   "status": "success",
   "error": null,
   "counts": {
-    "UPDATE": 0,
-    "UNCHANGED": 6,
+    "UPDATE": 3,
+    "UNCHANGED": 3,
     "UNMATCHED": 1,
     "rejected": 1,
     "ignored": 1
@@ -21,16 +21,16 @@
     {
       "sku": "AB-100",
       "location": "Dallas Warehouse",
-      "oldValue": 8,
+      "oldValue": 5,
       "newValue": 8,
-      "action": "UNCHANGED"
+      "action": "UPDATE"
     },
     {
       "sku": "CD-200",
       "location": "Atlanta Warehouse",
-      "oldValue": 0,
+      "oldValue": 2,
       "newValue": 0,
-      "action": "UNCHANGED"
+      "action": "UPDATE"
     },
     {
       "sku": "EF-300",
@@ -56,9 +56,9 @@
     {
       "sku": "IJ-500",
       "location": "Dallas Warehouse",
-      "oldValue": 0,
+      "oldValue": 3,
       "newValue": 0,
-      "action": "UNCHANGED"
+      "action": "UPDATE"
     }
   ],
   "rejected": [

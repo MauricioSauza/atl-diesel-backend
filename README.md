@@ -191,7 +191,39 @@ Only the three `UPDATE` rows changed. Everything else, including stock the ERP e
 
 ---
 
-## 6. Tests and checks
+## 6. Admin screen
+
+A local page built with Vite, React and [Polaris](https://polaris-react.shopify.com) that shows the last run and starts new runs.
+
+- Last run: when it ran, dry run or applied, success or failed, and counts (UPDATE, UNCHANGED, UNMATCHED, rejected, ignored)
+- Table of results per SKU and location (old value, new value, action)
+- Rejected and ignored rows with their CSV line and reason
+- **Start dry run** and **Apply to Shopify** buttons
+
+It needs two terminals:
+
+```bash
+# terminal 1: API (port 3001), runs the sync and serves reports/latest.json
+npm run admin:api
+
+# terminal 2: the page (port 5173)
+cd admin
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. The page calls `/api/...`, and Vite forwards those requests to the API on port 3001.
+
+![Admin screen after an applied run](assets/05-admin-screen.png)
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/report` | Last run report (`404` if there are no runs yet) |
+| `POST /api/sync` with `{ "dryRun": true }` or `{ "dryRun": false }` | Runs the sync and returns the new report. `409` if a sync is already running |
+
+---
+
+## 7. Tests and checks
 
 ```bash
 npm test            # unit tests (reconciliation rules, Shopify client retries, report)
@@ -221,7 +253,13 @@ src/
   graphql/                     GraphQL queries and mutation
   helpers/sku-search.ts        builds the Shopify SKU search string
   scripts/reset-stock.ts       resets the store to the starting stock
+  server.ts                    API for the admin screen (Express)
 tests/                         Jest unit tests + test data (constants.ts)
+admin/                         admin screen (Vite + React + Polaris)
+  src/App.tsx                  page: buttons, last run, tables
+  src/api.ts                   calls to the API
+  src/types.ts                 run report types
+  src/components/              RunSummary, ResultsTable, SkippedRows
 ```
 
 ---

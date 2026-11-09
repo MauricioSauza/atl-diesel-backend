@@ -13,7 +13,8 @@
     "lint:fix": "eslint . --fix",
     "test:coverage": "npm test -- --coverage",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
-    "reset-stock": "tsx --env-file-if-exists=.env src/scripts/reset-stock.ts"
+    "reset-stock": "tsx --env-file-if-exists=.env src/scripts/reset-stock.ts",
+    "admin:api": "tsx --env-file-if-exists=.env src/server.ts"
   },
   "keywords": [],
   "author": "",
